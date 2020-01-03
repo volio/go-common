@@ -14,7 +14,7 @@ func L() *zap.Logger {
 	return logger
 }
 
-func InitLog(c Config) {
+func InitLog(c Config) error {
 	var level zapcore.Level
 	switch c.Level {
 	case "panic":
@@ -46,7 +46,5 @@ func InitLog(c Config) {
 
 	var err error
 	logger, err = zc.Build()
-	if err != nil {
-		panic("build log failed: " + err.Error())
-	}
+	return err
 }
