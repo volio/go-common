@@ -13,51 +13,51 @@ import (
 	"go.uber.org/zap"
 )
 
-type Server interface {
+type Service interface {
 	Start() error
 	Stop() error
 }
 
-type ServerRunner interface {
+type ServiceRunner interface {
 	Wait()
 }
 
-func RunServer(s Server) ServerRunner {
+func RunService(s Service) ServiceRunner {
 	r := newServiceRunner(s)
 	r.run()
 	return r
 }
 
-func newServiceRunner(s Server) *serverRunner {
-	return &serverRunner{
+func newServiceRunner(s Service) *serviceRunner {
+	return &serviceRunner{
 		signals: make(chan os.Signal, 1),
-		server:  s,
+		service: s,
 	}
 }
 
-type serverRunner struct {
-	server  Server
+type serviceRunner struct {
+	service Service
 	signals chan os.Signal
 	wg      sync.WaitGroup
 	stopped int32
 }
 
-func (r *serverRunner) Wait() {
+func (r *serviceRunner) Wait() {
 	r.wg.Wait()
 }
 
-func (r *serverRunner) run() {
+func (r *serviceRunner) run() {
 	r.wg.Add(1)
 	go r.handleSignal()
 	go r.handleStart()
 }
 
-func (r *serverRunner) handleStart() {
+func (r *serviceRunner) handleStart() {
 	func() {
 		defer util.Recovery()
-		err := r.server.Start()
+		err := r.service.Start()
 		if err != nil {
-			log.L().With(zap.Error(err)).Error("start server failed")
+			log.L().With(zap.Error(err)).Error("start service failed")
 		}
 	}()
 	if atomic.LoadInt32(&r.stopped) == 0 {
@@ -65,7 +65,7 @@ func (r *serverRunner) handleStart() {
 	}
 }
 
-func (r *serverRunner) handleSignal() {
+func (r *serviceRunner) handleSignal() {
 	signal.Notify(r.signals, syscall.SIGPIPE, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGABRT)
 	for sig := range r.signals {
 		switch sig {
@@ -80,17 +80,17 @@ func (r *serverRunner) handleSignal() {
 	}
 }
 
-func (r *serverRunner) signalHandler() {
+func (r *serviceRunner) signalHandler() {
 	go func() {
 		to := 10 * time.Second
 
 		time.Sleep(to)
-		log.L().Warn("server stop timeout")
+		log.L().Warn("service stop timeout")
 		os.Exit(1)
 	}()
 	atomic.StoreInt32(&r.stopped, 1)
-	err := r.server.Stop()
+	err := r.service.Stop()
 	if err != nil {
-		log.L().With(zap.Error(err)).Error("stop server failed")
+		log.L().With(zap.Error(err)).Error("stop service failed")
 	}
 }
