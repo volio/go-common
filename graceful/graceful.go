@@ -22,9 +22,12 @@ func Go(f func()) {
 	}()
 }
 
-// Wait until all goroutine finish
 func Wait() {
-	timeout := 5 * time.Second
+	WaitTimeout(5 * time.Second)
+}
+
+// Wait until all goroutine finish
+func WaitTimeout(timeout time.Duration) {
 	c := make(chan struct{})
 	go func() {
 		defer close(c)
