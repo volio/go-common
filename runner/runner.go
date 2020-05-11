@@ -18,41 +18,37 @@ type Service interface {
 	Stop() error
 }
 
-type ServiceRunner interface {
-	Wait()
-}
-
-func RunService(s Service) ServiceRunner {
+func RunService(s Service) *ServiceRunner {
 	r := newServiceRunner(s)
-	r.run()
+	r.Run()
 	return r
 }
 
-func newServiceRunner(s Service) *serviceRunner {
-	return &serviceRunner{
+func newServiceRunner(s Service) *ServiceRunner {
+	return &ServiceRunner{
 		signals: make(chan os.Signal, 1),
 		service: s,
 	}
 }
 
-type serviceRunner struct {
+type ServiceRunner struct {
 	service Service
 	signals chan os.Signal
 	wg      sync.WaitGroup
 	stopped int32
 }
 
-func (r *serviceRunner) Wait() {
+func (r *ServiceRunner) Wait() {
 	r.wg.Wait()
 }
 
-func (r *serviceRunner) run() {
+func (r *ServiceRunner) Run() {
 	r.wg.Add(1)
 	go r.handleSignal()
 	go r.handleStart()
 }
 
-func (r *serviceRunner) handleStart() {
+func (r *ServiceRunner) handleStart() {
 	func() {
 		defer util.Recovery()
 		err := r.service.Start()
@@ -65,7 +61,7 @@ func (r *serviceRunner) handleStart() {
 	}
 }
 
-func (r *serviceRunner) handleSignal() {
+func (r *ServiceRunner) handleSignal() {
 	signal.Notify(r.signals, syscall.SIGPIPE, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGABRT)
 	for sig := range r.signals {
 		switch sig {
@@ -80,7 +76,7 @@ func (r *serviceRunner) handleSignal() {
 	}
 }
 
-func (r *serviceRunner) signalHandler() {
+func (r *ServiceRunner) signalHandler() {
 	go func() {
 		to := 10 * time.Second
 

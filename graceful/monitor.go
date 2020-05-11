@@ -2,28 +2,22 @@ package graceful
 
 import "sync"
 
-type Monitor interface {
-	StartRoutine()
-	FinishRoutine()
-	Wait()
+func NewGraceful() *Graceful {
+	return new(Graceful)
 }
 
-func NewMonitor() Monitor {
-	return new(graceful)
-}
-
-type graceful struct {
+type Graceful struct {
 	wg sync.WaitGroup
 }
 
-func (g *graceful) StartRoutine() {
+func (g *Graceful) StartRoutine() {
 	g.wg.Add(1)
 }
 
-func (g *graceful) FinishRoutine() {
+func (g *Graceful) FinishRoutine() {
 	g.wg.Done()
 }
 
-func (g *graceful) Wait() {
+func (g *Graceful) Wait() {
 	g.wg.Wait()
 }

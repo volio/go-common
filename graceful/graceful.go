@@ -7,8 +7,14 @@ import (
 	"github.com/volio/go-common/util"
 )
 
+type Monitor interface {
+	StartRoutine()
+	FinishRoutine()
+	Wait()
+}
+
 var (
-	monitor = NewMonitor()
+	monitor Monitor = NewGraceful()
 )
 
 func Go(f func()) {
@@ -35,8 +41,8 @@ func WaitTimeout(timeout time.Duration) {
 	}()
 	select {
 	case <-c:
-		log.L().Info("graceful.Wait ok")
+		log.L().Info("Graceful.Wait ok")
 	case <-time.After(timeout):
-		log.L().Error("graceful.Wait timeout")
+		log.L().Error("Graceful.Wait timeout")
 	}
 }

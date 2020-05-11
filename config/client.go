@@ -4,28 +4,22 @@ import (
 	"github.com/spf13/viper"
 )
 
-type LocalConfigClient interface {
-	SetConfigPath(path string) LocalConfigClient
-	SetConfigMap(configMap map[string]interface{}) LocalConfigClient
-	Read() error
-}
-
-type localConfigClient struct {
+type LocalConfig struct {
 	configPath string
 	configMap  map[string]interface{}
 }
 
-func (c *localConfigClient) SetConfigPath(path string) LocalConfigClient {
+func (c *LocalConfig) SetConfigPath(path string) *LocalConfig {
 	c.configPath = path
 	return c
 }
 
-func (c *localConfigClient) SetConfigMap(configMap map[string]interface{}) LocalConfigClient {
+func (c *LocalConfig) SetConfigMap(configMap map[string]interface{}) *LocalConfig {
 	c.configMap = configMap
 	return c
 }
 
-func (c *localConfigClient) Read() error {
+func (c *LocalConfig) Read() error {
 	for name, conf := range c.configMap {
 		v := viper.New()
 		v.SetConfigName(name)
