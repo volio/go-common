@@ -1,6 +1,3 @@
-BUILD_DIR := build
-BINARY_NAME := go-common
-
 #environment
 export GOPRIVATE=github.com/volio
 export GOPROXY=https://goproxy.io
