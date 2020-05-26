@@ -5,11 +5,12 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
-	"xorm.io/core"
+	"xorm.io/xorm"
+	"xorm.io/xorm/log"
+	"xorm.io/xorm/names"
 )
 
-func NewMysql(c Config) (*xorm.Engine, error) {
+func NewMySQL(c Config) (*xorm.Engine, error) {
 	dsn := buildDSN(c)
 	engine, err := xorm.NewEngine("mysql", dsn)
 
@@ -21,12 +22,11 @@ func NewMysql(c Config) (*xorm.Engine, error) {
 
 	if c.Debug {
 		engine.ShowSQL(true)
-		engine.ShowExecTime(true)
-		engine.Logger().SetLevel(core.LOG_DEBUG)
+		engine.Logger().SetLevel(log.LOG_DEBUG)
 	}
 
-	engine.SetTableMapper(core.GonicMapper{})
-	engine.SetColumnMapper(core.GonicMapper{})
+	engine.SetTableMapper(names.GonicMapper{})
+	engine.SetColumnMapper(names.GonicMapper{})
 
 	engine.SetMaxIdleConns(c.PoolSize)
 	engine.SetMaxOpenConns(c.PoolSize)
