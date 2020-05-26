@@ -36,5 +36,5 @@ func NewMySQL(c Config) (*xorm.Engine, error) {
 }
 
 func buildDSN(c Config) string {
-	return fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=%s", c.Username, c.Password, c.Host, c.Port, c.Name, c.Charset)
+	return fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=%s&loc=Local", c.Username, c.Password, c.Host, c.Port, c.Name, c.Charset)
 }
