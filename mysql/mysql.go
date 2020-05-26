@@ -18,7 +18,14 @@ func NewMySQL(c Config) (*xorm.Engine, error) {
 		return nil, err
 	}
 
-	engine.TZLocation, _ = time.LoadLocation(c.Location)
+	engine.TZLocation, err = time.LoadLocation(c.TZLocation)
+	if err != nil {
+		return nil, err
+	}
+	engine.DatabaseTZ, err = time.LoadLocation(c.DataBaseTZ)
+	if err != nil {
+		return nil, err
+	}
 
 	if c.Debug {
 		engine.ShowSQL(true)
