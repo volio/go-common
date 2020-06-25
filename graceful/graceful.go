@@ -28,6 +28,12 @@ func Go(f func()) {
 	}()
 }
 
+func GoSync(f func()) {
+	monitor.StartRoutine()
+	defer monitor.FinishRoutine()
+	f()
+}
+
 func Wait() {
 	WaitTimeout(5 * time.Second)
 }
